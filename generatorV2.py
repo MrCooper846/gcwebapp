@@ -11,14 +11,17 @@ import aiofiles, httpx, pandas as pd
 from bs4 import BeautifulSoup, FeatureNotFound
 from openai import AsyncOpenAI
 from tqdm.asyncio import tqdm
+from dotenv import load_dotenv
+import os
+
 
 # ───────── CONFIG ─────────
 OPENALEX_API = "https://api.openalex.org/institutions"
 MODEL        = "gpt-4o-mini"
 HEADERS      = {"User-Agent": "UniContactsAsync/2.2"}
 TIMEOUT      = httpx.Timeout(10.0)
-OPENAI_API_KEY=""
-
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PROBE_LIMIT      = 15
 CONCURRENCY      = 12
 GPT_CONCURRENCY  = 4
@@ -168,6 +171,7 @@ async def main(country,limit,outfile,probes):
     for _ in tqdm(asyncio.as_completed(tasks),total=len(tasks),unit="uni",desc="universities"):
         try: await _
         except Exception as e: print("[warn] task error:",e)
+    await _cleanup()
 
     if not results:
         print("No contacts found"); return
@@ -197,4 +201,6 @@ def cli():
     try: asyncio.run(main(args.country.upper(),args.limit,args.outfile,args.probes))
     finally: asyncio.run(_cleanup())
 
-if __name__=="__main__": cli()
+def run_generator(country: str, output_path: str = "downloads/contacts.csv", limit: int = 1000, probes: int = PROBE_LIMIT):
+        asyncio.run(main(country.upper(), limit, output_path, probes))
+    
