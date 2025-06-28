@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>University Contact Scraper</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; margin-top: 100px; }
-        input, button { padding: 10px; font-size: 16px; }
-    </style>
+  <meta charset="UTF-8">
+  <title>University Contact Scraper</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 100px; }
+    input, button { padding: 10px; font-size: 16px; }
+    #loading { display: none; font-size: 18px; margin-top: 20px; }
+  </style>
+  <script>
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+  </script>
 </head>
 <body>
-    <h1>University Contact Scraper</h1>
-    <form method="POST">
-        <input name="country" placeholder="Enter country code (e.g., US, GB, IN)" required>
-        <button type="submit">Generate and Download</button>
-    </form>
+  <h1>University Contact Scraper</h1>
+  <form method="POST" onsubmit="showLoading()">
+    <input name="country" placeholder="Enter country code (e.g., US, GB, IN)" required>
+    <button type="submit">Generate and Prepare File</button>
+  </form>
+  <div id="loading">⏳ Scraping universities… please wait!</div>
 </body>
 </html>
