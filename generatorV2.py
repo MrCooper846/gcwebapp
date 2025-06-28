@@ -17,8 +17,7 @@ OPENALEX_API = "https://api.openalex.org/institutions"
 MODEL        = "gpt-4o-mini"
 HEADERS      = {"User-Agent": "UniContactsAsync/2.2"}
 TIMEOUT      = httpx.Timeout(10.0)
-OPENAI_API_KEY="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"
-
+OPENAI_API_KEY=""
 
 PROBE_LIMIT      = 15
 CONCURRENCY      = 12
