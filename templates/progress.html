@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Running…</title>
+  <style>
+    .bar { width: 100%; background: #eee; border-radius: 6px; overflow: hidden; height: 18px; }
+    .fill { height: 100%; width: 0%; background: #0a84ff; transition: width .2s; }
+    .log { font: 12px/1.4 system-ui, sans-serif; margin-top: 8px; max-height: 40vh; overflow:auto; white-space: pre-wrap;}
+  </style>
+</head>
+<body>
+  <h3>Collecting contacts…</h3>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div id="meta">Preparing…</div>
+  <div class="log" id="log"></div>
+
+  <script>
+    const fill = document.getElementById('fill');
+    const meta = document.getElementById('meta');
+    const log  = document.getElementById('log');
+    const es   = new EventSource('{{ url_for("sse", job_id=job_id) }}');
+
+    let total = null, done = 0;
+
+    function setProgress(d, t) {
+      if (!t || t <= 0) { fill.style.width = '25%'; meta.textContent = `Working…`; return; }
+      const pct = Math.max(0, Math.min(100, Math.round((d / t) * 100)));
+      fill.style.width = pct + '%';
+      meta.textContent = `Universities: ${d} / ${t} (${pct}%)`;
+    }
+
+    es.onmessage = (e) => {
+      try {
+        const ev = JSON.parse(e.data);
+        if (ev.event === 'start') {
+          total = ev.total;
+          setProgress(0, total);
+          log.textContent += `Started. Total universities: ${total ?? 'unknown'}\n`;
+        } else if (ev.event === 'tick') {
+          done = ev.done || done;
+          total = ev.total ?? total;
+          setProgress(done, total);
+        } else if (ev.event === 'finish') {
+          setProgress(total || done, total || done);
+          log.textContent += `Finished. Preparing download…\n`;
+        } else if (ev.event === 'error') {
+          log.textContent += `Error: ${ev.message}\n`;
+        } else if (ev.event === 'hello') {
+          // ignore
+        } else if (ev.event === 'done') {
+          es.close();
+          window.location.href = '{{ url_for("download_page", job_id=job_id) }}';
+        }
+      } catch { /* ignore malformed lines */ }
+    };
+  </script>
+</body>
+</html>
